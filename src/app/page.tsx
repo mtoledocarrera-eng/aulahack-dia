@@ -28,12 +28,20 @@ export default function HomePage() {
 
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            {hasData && (
+            {hasData ? (
               <button
                 className="btn-primary"
                 onClick={() => router.push('/dashboard/academico')}
               >
                 Ir al Dashboard
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <button
+                className="btn-primary"
+                onClick={() => router.push('/login')}
+              >
+                Ingresar
                 <ArrowRight className="w-4 h-4" />
               </button>
             )}
