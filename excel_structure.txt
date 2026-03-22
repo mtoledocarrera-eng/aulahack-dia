@@ -1,0 +1,162 @@
+File: RBD7404_DIA_MATEMATICA_3_A_Resultados_de_estudiantes_Equipo_docente_Cierre_2025.xls
+Sheet: Hoja1
+Total rows: 27
+Range: A1:H27
+
+--- ROW 0 ---
+--- ROW 1 ---
+--- ROW 2 ---
+--- ROW 3 ---
+--- ROW 4 ---
+  [0]: "Establecimiento"
+  [1]: "COLEGIO RENE SORIANO BORQUEZ"
+--- ROW 5 ---
+  [0]: "Curso"
+  [1]: "3 A"
+--- ROW 6 ---
+  [0]: "Fecha de descarga de este reporte"
+  [1]: "11/02/2026 22:54:35"
+--- ROW 7 ---
+--- ROW 8 ---
+--- ROW 9 ---
+--- ROW 10 ---
+--- ROW 11 ---
+  [2]: "EJES TEMÁTICOS"
+--- ROW 12 ---
+  [0]: "Número de Lista"
+  [1]: "Nombre del Estudiante"
+  [2]: "Números y operaciones"
+  [3]: "Patrones y álgebra"
+  [4]: "Geometría"
+  [5]: "Medición"
+  [6]: "Datos y probabilidades"
+  [7]: "NIVEL DE LOGRO"
+--- ROW 13 ---
+  [0]: 1
+  [1]: "CARVALLO CARMONA ANDREA AMOREHT"
+  [2]: "28,57"
+  [3]: "0,00"
+  [4]: "0,00"
+  [5]: "33,33"
+  [6]: "0,00"
+  [7]: "nivel I"
+--- ROW 14 ---
+  [0]: 3
+  [1]: "GARCÉS HERNÁNDEZ NICOLÁS ANDRÉS"
+  [2]: "60,71"
+  [3]: "100,00"
+  [4]: "100,00"
+  [5]: "66,67"
+  [6]: "50,00"
+  [7]: "nivel II"
+--- ROW 15 ---
+  [0]: 4
+  [1]: "JARA ANCALEF MADELIN AYMAR"
+  [2]: "64,29"
+  [3]: "100,00"
+  [4]: "100,00"
+  [5]: "66,67"
+  [6]: "0,00"
+  [7]: "nivel II"
+--- ROW 16 ---
+  [0]: 5
+  [1]: "MANRÍQUEZ ENA GUILLERMO JAVIER"
+  [2]: "92,86"
+  [3]: "100,00"
+  [4]: "100,00"
+  [5]: "100,00"
+  [6]: "50,00"
+  [7]: "nivel III"
+--- ROW 17 ---
+  [0]: 6
+  [1]: "MILLAPEL GUZMÁN BELÉN ELIZABETH"
+  [2]: "82,14"
+  [3]: "100,00"
+  [4]: "50,00"
+  [5]: "100,00"
+  [6]: "0,00"
+  [7]: "nivel II"
+--- ROW 18 ---
+  [0]: 7
+  [1]: "MUÑOZ MILLALLANCA RICARDO ANTONIO"
+  [2]: "82,14"
+  [3]: "100,00"
+  [4]: "100,00"
+  [5]: "100,00"
+  [6]: "50,00"
+  [7]: "nivel III"
+--- ROW 19 ---
+  [0]: 8
+  [1]: "MUÑOZ OYARZÚN IGNACIA EMILIA AILEN"
+  [2]: "28,57"
+  [3]: "0,00"
+  [4]: "50,00"
+  [5]: "66,67"
+  [6]: "0,00"
+  [7]: "nivel I"
+--- ROW 20 ---
+  [0]: 9
+  [1]: "RIQUELME NAGUIL ISIDORA PASCAAL SUSANA"
+  [2]: "100,00"
+  [3]: "100,00"
+  [4]: "100,00"
+  [5]: "66,67"
+  [6]: "50,00"
+  [7]: "nivel III"
+--- ROW 21 ---
+  [0]: 10
+  [1]: "ROMERO LOVERA CRISTOPHER ALEJANDRO"
+  [2]: "78,57"
+  [3]: "100,00"
+  [4]: "50,00"
+  [5]: "66,67"
+  [6]: "50,00"
+  [7]: "nivel II"
+--- ROW 22 ---
+  [0]: 12
+  [1]: "SILVA SOLÍS CRISTOFER ANDRÉS"
+  [2]: "28,57"
+  [3]: "50,00"
+  [4]: "100,00"
+  [5]: "0,00"
+  [6]: "50,00"
+  [7]: "nivel I"
+--- ROW 23 ---
+  [0]: 14
+  [1]: "FORERO TORRES LIAM CAMILO"
+  [2]: "100,00"
+  [3]: "100,00"
+  [4]: "50,00"
+  [5]: "100,00"
+  [6]: "50,00"
+  [7]: "nivel III"
+--- ROW 24 ---
+  [0]: 15
+  [1]: "CATALÁN CÁRCAMO KATHERINE PAZ"
+  [2]: "57,14"
+  [3]: "0,00"
+  [4]: "100,00"
+  [5]: "0,00"
+  [6]: "50,00"
+  [7]: "nivel II"
+--- ROW 25 ---
+  [0]: 16
+  [1]: "MARIPÁN FROHLICH TOMÁS IGNACIO"
+  [2]: "85,71"
+  [3]: "100,00"
+  [4]: "100,00"
+  [5]: "33,33"
+  [6]: "0,00"
+  [7]: "nivel II"
+--- ROW 26 ---
+  [0]: 17
+  [1]: "DÍAZ DÍAZ ANTONELLA PASCAL GLADYS"
+  [2]: "92,86"
+  [3]: "100,00"
+  [4]: "100,00"
+  [5]: "66,67"
+  [6]: "0,00"
+  [7]: "nivel III"
+
+--- MERGES (1) ---
+  C12:G12
