@@ -19,11 +19,11 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="relative w-8 h-8 flex items-center justify-center">
-              <img src="/logo.png" alt="AulaHack Logo" className="w-full h-full object-contain" />
+              <img src="/logo.png" alt="AulaHack Logo" className="w-full h-full object-contain rounded-lg" />
             </div>
-            <h1 className="text-xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
-              <span className="text-brand-500">Aula</span><span className="text-[#f97316]">Hack</span>
-            </h1>
+            <span className="font-display text-xl font-bold gradient-text">
+              AulaHack
+            </span>
           </div>
 
           <div className="flex items-center gap-4">
