@@ -2,7 +2,7 @@ const XLSX = require('./node_modules/xlsx');
 const fs = require('fs');
 const path = require('path');
 
-const file = path.join(__dirname, 'datos', 'RBD7404_DIA_MATEMATICA_3_A_Resultados_de_estudiantes_Equipo_docente_Cierre_2025.xls');
+const file = path.join(__dirname, 'datos', 'resultados_estudiantes_7404_MATEMÁTICA_3_A_diagnostico_2026.xls');
 const wb = XLSX.readFile(file);
 const ws = wb.Sheets[wb.SheetNames[0]];
 const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });

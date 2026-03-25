@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/contexts/AuthContext';
-import { getAIHistory } from '@/lib/firebase/db';
+import { getAIHistory, loadDatasetFromCloud, deleteAcademicEvaluation } from '@/lib/firebase/db';
 import { Archive, Bot, ShieldAlert, FileText, Loader2, Clock } from 'lucide-react';
 
 export default function HistorialPage() {
@@ -11,29 +11,52 @@ export default function HistorialPage() {
   const [historiaDua, setHistoriaDua] = useState<any[]>([]);
   const [historiaRiesgo, setHistoriaRiesgo] = useState<any[]>([]);
   const [historiaTickets, setHistoriaTickets] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'dua' | 'riesgo' | 'tickets'>('dua');
+  const [datasets, setDatasets] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'dua' | 'riesgo' | 'tickets' | 'datos'>('dua');
 
   useEffect(() => {
     if (!user) return;
-    const fetchHistory = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const [dua, riesgo, tickets] = await Promise.all([
+        const [dua, riesgo, tickets, dataset] = await Promise.all([
           getAIHistory(user.uid, 'dua'),
           getAIHistory(user.uid, 'riesgo'),
-          getAIHistory(user.uid, 'tickets')
+          getAIHistory(user.uid, 'tickets'),
+          loadDatasetFromCloud(user.uid)
         ]);
         setHistoriaDua(dua);
         setHistoriaRiesgo(riesgo);
         setHistoriaTickets(tickets);
+        setDatasets(dataset?.academicos || []);
       } catch (error) {
-        console.error('Error fetching history:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchHistory();
+    fetchData();
   }, [user]);
+
+  const handleDeleteEvaluation = async (item: any) => {
+    if (!user) return;
+    if (!confirm(`¿Estás seguro de que deseas eliminar la evaluación de ${item.asignatura} - ${item.curso}? Esta acción no se puede deshacer.`)) return;
+
+    try {
+      await deleteAcademicEvaluation(user.uid, {
+        asignatura: item.asignatura,
+        curso: item.curso,
+        periodo: item.periodo
+      });
+      // Refresh list
+      setDatasets(prev => prev.filter(a => 
+        !(a.asignatura === item.asignatura && a.curso === item.curso && a.periodo === item.periodo)
+      ));
+    } catch (error) {
+      console.error('Error deleting evaluation:', error);
+      alert('Error al eliminar la evaluación.');
+    }
+  };
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return 'Fecha desconocida';
@@ -102,6 +125,19 @@ export default function HistorialPage() {
               </div>
               <span className="text-xs bg-black/10 dark:bg-white/10 px-2 py-0.5 rounded-full">{historiaTickets.length}</span>
             </button>
+            <button
+              onClick={() => setActiveTab('datos')}
+              className={`text-left px-4 py-3 rounded-xl flex items-center justify-between transition-colors font-medium border ${
+                activeTab === 'datos' 
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-800' 
+                  : 'bg-transparent text-slate-600 border-transparent hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Archive className="w-4 h-4" /> Datos Académicos
+              </div>
+              <span className="text-xs bg-black/10 dark:bg-white/10 px-2 py-0.5 rounded-full">{datasets.length}</span>
+            </button>
           </div>
 
           {/* Content Area */}
@@ -135,41 +171,89 @@ export default function HistorialPage() {
                 ))
               )
             )}
+
+            {activeTab === 'datos' && (
+              datasets.length === 0 ? (
+                <EmptyState icon={<Archive />} text="No hay bases de datos académicas cargadas." />
+              ) : (
+                <div className="space-y-4">
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-sm">
+                    <p className="font-bold flex items-center gap-2 mb-1">
+                      <Archive className="w-4 h-4" /> Gestión de Datos
+                    </p>
+                    Aquí puedes ver y eliminar los archivos Excel que has procesado. Esto actualizará el análisis global de tu curso.
+                  </div>
+                  {datasets.map((item, idx) => (
+                    <div key={`${item.asignatura}-${item.curso}-${idx}`} className="glass-card p-5 flex items-center justify-between gap-4 border-l-4 border-emerald-500 hover:shadow-lg transition-all">
+                      <div>
+                        <h3 className="font-bold text-slate-800 dark:text-slate-100">{item.asignatura}</h3>
+                        <div className="flex items-center gap-3 mt-1">
+                          <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-600 dark:text-slate-400">
+                             {item.curso}
+                          </span>
+                          <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-600 dark:text-slate-400 capitalize">
+                             {item.periodo}
+                          </span>
+                          <span className="text-xs text-slate-400">
+                            {item.totalEvaluados} estudiantes
+                          </span>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => handleDeleteEvaluation(item)}
+                        className="p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-full transition-colors group"
+                        title="Eliminar esta evaluación"
+                      >
+                        <Archive className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )
+            )}
           </div>
         </div>
       )}
     </div>
   );
 
-  function EmptyState({ icon, text }: { icon: any, text: string }) {
-    return (
-      <div className="glass-card flex flex-col items-center justify-center p-12 text-center text-[var(--color-text-muted)] border-dashed border-2">
-        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4 opacity-50">
-          {icon}
-        </div>
-        <p className="font-medium text-lg text-[var(--color-text-secondary)]">{text}</p>
-        <p className="text-sm mt-1">Ve a la herramienta correspondiente en el menú para crear una.</p>
-      </div>
-    );
-  }
+}
 
-  function HistoryItem({ item, title, subtitle, isAlert = false }: { item: any, title: string, subtitle: string, isAlert?: boolean }) {
-    return (
-      <div className={`glass-card p-6 border-l-4 ${isAlert ? 'border-l-orange-500' : 'border-l-brand-500'}`}>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 border-b border-[var(--color-border)] pb-4">
-          <div>
-            <h3 className="text-lg font-bold text-[var(--color-text-primary)]">{title}</h3>
-            <p className="text-sm text-[var(--color-text-secondary)] font-medium mt-1">{subtitle}</p>
-          </div>
-          <div className="shrink-0 flex items-center gap-2 text-xs font-semibold text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full">
-            <Clock className="w-3.5 h-3.5" />
-            {formatDate(item.createdAt)}
-          </div>
+function EmptyState({ icon, text }: { icon: any, text: string }) {
+  return (
+    <div className="glass-card flex flex-col items-center justify-center p-12 text-center text-[var(--color-text-muted)] border-dashed border-2">
+      <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4 opacity-50">
+        {icon}
+      </div>
+      <p className="font-medium text-lg text-[var(--color-text-secondary)]">{text}</p>
+      <p className="text-sm mt-1">Ve a la herramienta correspondiente en el menú para crear una.</p>
+    </div>
+  );
+}
+
+function HistoryItem({ item, title, subtitle, isAlert = false }: { item: any, title: string, subtitle: string, isAlert?: boolean }) {
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return 'Fecha desconocida';
+    return new Date(dateStr).toLocaleString('es-CL', {
+      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+  };
+
+  return (
+    <div className={`glass-card p-6 border-l-4 ${isAlert ? 'border-l-orange-500' : 'border-l-brand-500'}`}>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 border-b border-[var(--color-border)] pb-4">
+        <div>
+          <h3 className="text-lg font-bold text-[var(--color-text-primary)]">{title}</h3>
+          <p className="text-sm text-[var(--color-text-secondary)] font-medium mt-1">{subtitle}</p>
         </div>
-        <div className="prose prose-sm dark:prose-invert max-w-none text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-wrap max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-          {item.content}
+        <div className="shrink-0 flex items-center gap-2 text-xs font-semibold text-slate-500 bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full">
+          <Clock className="w-3.5 h-3.5" />
+          {formatDate(item.createdAt)}
         </div>
       </div>
-    );
-  }
+      <div className="prose prose-sm dark:prose-invert max-w-none text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-wrap max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+        {item.content}
+      </div>
+    </div>
+  );
 }

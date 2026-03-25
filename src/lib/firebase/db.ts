@@ -21,6 +21,22 @@ export async function loadDatasetFromCloud(userId: string): Promise<DatosDIA | n
   return null;
 }
 
+export async function deleteAcademicEvaluation(userId: string, target: { asignatura: string, curso: string, periodo: string }): Promise<void> {
+  const docRef = doc(db, 'users', userId, 'datasets', 'current');
+  const snap = await getDoc(docRef);
+  if (snap.exists()) {
+    const data = snap.data() as DatosDIA;
+    const initialCount = data.academicos.length;
+    data.academicos = data.academicos.filter(a => 
+      !(a.asignatura === target.asignatura && a.curso === target.curso && a.periodo === target.periodo)
+    );
+    
+    if (data.academicos.length < initialCount) {
+      await setDoc(docRef, { ...data, updatedAt: Timestamp.now() }, { merge: false });
+    }
+  }
+}
+
 // --- History (AI Generators) ---
 export async function saveAIHistory(userId: string, type: 'dua' | 'riesgo' | 'tickets', content: string, metadata: any): Promise<void> {
   const ref = doc(collection(db, 'users', userId, `historial_${type}`));

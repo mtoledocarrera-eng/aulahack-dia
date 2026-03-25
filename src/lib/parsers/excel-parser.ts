@@ -35,12 +35,12 @@ function parseFilename(filename: string): {
 
   // Extract subject
   let asignatura: AsignaturaAcademica = 'Lectura';
-  if (/MATEMATICA/i.test(name)) asignatura = 'Matemática';
+  if (/MATEM[AÁ]TICA/i.test(name)) asignatura = 'Matemática';
   else if (/LECTURA/i.test(name)) asignatura = 'Lectura';
   else if (/HISTORIA/i.test(name)) asignatura = 'Historia, Geografía y Ciencias Sociales';
-  else if (/CIENCIAS\s*NATURALES/i.test(name)) asignatura = 'Ciencias Naturales';
+  else if (/CIENCIAS.*NATURALES/i.test(name)) asignatura = 'Ciencias Naturales';
   else if (/ESCRITURA/i.test(name)) asignatura = 'Escritura';
-  else if (/INGLES/i.test(name)) asignatura = 'Inglés';
+  else if (/INGL[EÉ]S/i.test(name)) asignatura = 'Inglés';
 
   // Extract course number and section
   // Pattern: _ASIGNATURA_3_A_ or _ASIGNATURA_1_A_
@@ -144,11 +144,22 @@ export async function parseExcelFile(
   const headerRowIdx = findHeaderRow(data);
   const headerRow = data[headerRowIdx] as string[];
 
-  // Identify axis columns (between "Nombre" and "NIVEL DE LOGRO")
+  // Identify axis columns (between "Nombre" and potentially "NIVEL DE LOGRO")
   const nombreColIdx = 1; // Usually column 1
-  const nivelColIdx = headerRow.length - 1; // Last column
+  let nivelColIdx = headerRow.findIndex(h => String(h).toLowerCase().includes('nivel'));
+  
+  // If not found by name, check if the last column looks like a level (I, II, III)
+  if (nivelColIdx === -1) {
+    const lastColIdx = headerRow.length - 1;
+    const lastColSample = data.slice(headerRowIdx + 1, headerRowIdx + 5)
+      .map(row => String(row[lastColIdx] || '').toLowerCase());
+    if (lastColSample.some(s => s.includes('nivel') || s === 'i' || s === 'ii' || s === 'iii')) {
+      nivelColIdx = lastColIdx;
+    }
+  }
+
   const ejesStartIdx = 2; // First axis column
-  const ejesEndIdx = nivelColIdx - 1; // Last axis column
+  const ejesEndIdx = nivelColIdx !== -1 ? nivelColIdx - 1 : headerRow.length - 1;
 
   // Extract axis names from header
   const ejesNames: string[] = [];
@@ -169,8 +180,11 @@ export async function parseExcelFile(
     const nombre = String(row[nombreColIdx]).trim();
     if (!nombre) continue;
 
-    const nivelStr = String(row[nivelColIdx] || 'nivel I').trim();
-    const nivelLogro = parseNivelLogro(nivelStr);
+    let nivelLogro: NivelLogro = 'I';
+    if (nivelColIdx !== -1) {
+      const nivelStr = String(row[nivelColIdx] || 'nivel I').trim();
+      nivelLogro = parseNivelLogro(nivelStr);
+    }
 
     // Calculate student average from axes
     let totalPct = 0;
@@ -191,11 +205,20 @@ export async function parseExcelFile(
       axisCount++;
     }
 
+    const puntaje = axisCount > 0 ? Math.round(totalPct / axisCount) : 0;
+    
+    // Fallback for missing level column: calculate from percentage
+    if (nivelColIdx === -1) {
+      if (puntaje >= 75) nivelLogro = 'III';
+      else if (puntaje >= 50) nivelLogro = 'II';
+      else nivelLogro = 'I';
+    }
+
     estudiantes.push({
       id: `${meta.cursoNumero}${meta.cursoSeccion}-${i}`,
       nombre,
       nivelLogro,
-      puntaje: axisCount > 0 ? Math.round(totalPct / axisCount) : 0,
+      puntaje,
       resultadosPorEje: resultadosPorEjeEstudiante,
     });
   }

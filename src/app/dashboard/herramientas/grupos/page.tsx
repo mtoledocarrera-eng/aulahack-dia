@@ -3,7 +3,7 @@
 import { useDIAStore } from '@/lib/store/dia-store';
 import { getCursoLabel, EJES_POR_ASIGNATURA, type AsignaturaAcademica, type Periodo } from '@/lib/types/dia';
 import { Users, AlertCircle, ArrowRightLeft, Bot, Loader2, Copy, Check, Info } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -52,24 +52,9 @@ export default function MatchAprendizajePage() {
     periodos.length > 0 ? periodos[periodos.length - 1] : ''
   );
 
-  const ejesDisponibles = selectedAsignatura ? EJES_POR_ASIGNATURA[selectedAsignatura] || [] : [];
-  const [selectedEje, setSelectedEje] = useState<string>(
-    ejesDisponibles.length > 0 ? ejesDisponibles[0] : ''
-  );
-
   const [isLoading, setIsLoading] = useState(false);
   const [matchResult, setMatchResult] = useState<AIMatchResult | null>(null);
   const [copied, setCopied] = useState(false);
-
-  // Auto-select first axis when subject changes
-  useMemo(() => {
-    if (selectedAsignatura && EJES_POR_ASIGNATURA[selectedAsignatura]) {
-      const ejes = EJES_POR_ASIGNATURA[selectedAsignatura];
-      if (!ejes.includes(selectedEje)) {
-        setSelectedEje(ejes[0]);
-      }
-    }
-  }, [selectedAsignatura, selectedEje]);
 
   // Find the matching dataset
   const dataset = useMemo(() => {
@@ -78,6 +63,29 @@ export default function MatchAprendizajePage() {
       (a) => a.asignatura === selectedAsignatura && a.curso === selectedCurso && a.periodo === selectedPeriodo
     );
   }, [datos, selectedAsignatura, selectedCurso, selectedPeriodo]);
+
+  const ejesDisponibles = useMemo(() => {
+    if (!dataset) return [];
+    // Prioritize axes found in the actual data
+    if (dataset.resultadosPorEje && dataset.resultadosPorEje.length > 0) {
+      return dataset.resultadosPorEje.map(r => r.eje);
+    }
+    // Fallback to defaults
+    return selectedAsignatura ? EJES_POR_ASIGNATURA[selectedAsignatura] || [] : [];
+  }, [dataset, selectedAsignatura]);
+
+  const [selectedEje, setSelectedEje] = useState<string>('');
+
+  // Auto-select first axis when axes change
+  useEffect(() => {
+    if (ejesDisponibles.length > 0) {
+      if (!selectedEje || !ejesDisponibles.includes(selectedEje)) {
+        setSelectedEje(ejesDisponibles[0]);
+      }
+    } else {
+      setSelectedEje('');
+    }
+  }, [ejesDisponibles, selectedEje]);
 
   const estudiantesValidos = useMemo(() => {
     if (!dataset || !selectedEje || !dataset.estudiantes) return [];
