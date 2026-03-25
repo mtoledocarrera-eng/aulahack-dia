@@ -143,6 +143,18 @@ export default function LoginPage() {
             {!isLoggingIn && <span>→</span>}
           </button>
         </form>
+
+        <div className="mt-6 text-center">
+          <p className="text-slate-400 text-sm">
+            ¿No tienes una cuenta?{' '}
+            <button 
+              onClick={() => router.push('/register')}
+              className="text-brand-500 hover:text-brand-400 font-bold hover:underline transition-all"
+            >
+              Regístrate aquí
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );
