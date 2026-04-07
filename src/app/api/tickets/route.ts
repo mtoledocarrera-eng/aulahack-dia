@@ -1,6 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
 import { NextResponse } from "next/server";
 
+export const maxDuration = 60; // Evita el timeout de 15 segundos en Vercel por defecto
+
 const ai = new GoogleGenAI({ 
   apiKey: process.env.GEMINI_API_KEY 
 });
@@ -79,16 +81,26 @@ No agregues texto fuera del JSON ni uses bloques de código marcados con backtic
     
     // Safety replacement in case of markdown formatting
     const cleanJson = outputText.replace(/```json/gi, '').replace(/```/g, '').trim();
-    const parsedData = JSON.parse(cleanJson);
+    
+    let parsedData;
+    try {
+      parsedData = JSON.parse(cleanJson);
+    } catch (parseError) {
+      console.error("Error al parsear el JSON de Gemini:", cleanJson);
+      return NextResponse.json(
+        { error: "La IA generó una respuesta con formato inválido. Por favor intenta de nuevo." },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({ 
       text: parsedData.ticket,
       prompt: parsedData.prompt_sugerido
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating ticket:", error);
     return NextResponse.json(
-      { error: "Error interno al procesar el archivo con Gemini." },
+      { error: error.message || "Error interno al procesar el archivo con Gemini." },
       { status: 500 }
     );
   }
