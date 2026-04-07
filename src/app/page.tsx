@@ -5,10 +5,12 @@ import { useDIAStore } from '@/lib/store/dia-store';
 import { useRouter } from 'next/navigation';
 import { BarChart3, BookOpen, Brain, Users, ArrowRight, Database, Star } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { useAuth } from '@/lib/contexts/AuthContext';
 
 export default function HomePage() {
   const datos = useDIAStore((s) => s.datos);
   const router = useRouter();
+  const { user } = useAuth();
 
   const hasData = datos && datos.academicos.length > 0;
 
@@ -28,7 +30,7 @@ export default function HomePage() {
 
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            {hasData ? (
+            {user ? (
               <button
                 className="btn-primary"
                 onClick={() => router.push('/dashboard/academico')}
@@ -73,13 +75,25 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* File Uploader */}
-        <div className="w-full max-w-2xl animate-slide-up">
-          <FileUploader />
-        </div>
+        {/* File Uploader or CTA */}
+        {user ? (
+          <div className="w-full max-w-2xl animate-slide-up">
+            <FileUploader />
+          </div>
+        ) : (
+          <div className="mt-4 animate-slide-up">
+            <button
+              onClick={() => router.push('/login')}
+              className="btn-primary text-xl px-10 py-5 font-bold shadow-neon hover:scale-105 transition-all"
+            >
+              Comenzar ahora
+              <ArrowRight className="w-6 h-6 ml-2" />
+            </button>
+          </div>
+        )}
 
         {/* Quick navigation if data exists */}
-        {hasData && (
+        {(hasData && user) && (
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-3xl stagger-children">
             <button
               onClick={() => router.push('/dashboard/academico')}
@@ -122,8 +136,8 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Features when no data */}
-        {!hasData && (
+        {/* Features when no data or not logged in */}
+        {(!hasData || !user) && (
           <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl stagger-children">
             {[
               {
