@@ -1,9 +1,5 @@
-import { GoogleGenAI } from "@google/genai";
+import { generateContentWithFallback } from "@/lib/ai/gemini";
 import { NextResponse } from "next/server";
-
-const ai = new GoogleGenAI({ 
-  apiKey: process.env.GEMINI_API_KEY 
-});
 
 export async function POST(req: Request) {
   try {
@@ -66,8 +62,7 @@ REGLAS DE FORMATO:
       });
     }
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+    const response = await generateContentWithFallback({
       contents: [{
         role: "user",
         parts: parts

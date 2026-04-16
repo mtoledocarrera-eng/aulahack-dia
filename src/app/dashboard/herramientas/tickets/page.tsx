@@ -187,7 +187,7 @@ export default function TicketsPage() {
           Generador de Tickets de Salida con IA
         </h1>
         <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-          Sube el PDF de la prueba, indica la pregunta más descendida y Gemini creará una actividad remedial específica.
+          Sube los PDFs de la evaluación y resultados; Gemini identificará las 3 o 4 preguntas más críticas para generar un remedial integral basado en el eje más bajo.
         </p>
       </div>
 
@@ -374,8 +374,8 @@ export default function TicketsPage() {
               ) : (
                 <div className="flex flex-col items-center justify-center h-[400px] text-[var(--color-text-muted)] text-center p-8">
                   <Bot className="w-12 h-12 mb-4 opacity-50" />
-                  <p>Sube tu PDF y señala la pregunta fallida.</p>
-                  <p className="text-xs mt-2">La IA leerá el distractor original y creará un ejercicio nuevo para corregir la confusión.</p>
+                  <p>Sube los PDFs para iniciar el análisis automático.</p>
+                  <p className="text-xs mt-2">La IA detectará las preguntas de menor rendimiento y creará un remedial para corregir las confusiones en el eje crítico.</p>
                 </div>
               )}
             </div>

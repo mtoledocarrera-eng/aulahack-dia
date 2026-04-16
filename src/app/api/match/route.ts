@@ -1,9 +1,5 @@
-import { GoogleGenAI } from "@google/genai";
+import { generateContentWithFallback } from "@/lib/ai/gemini";
 import { NextResponse } from "next/server";
-
-const ai = new GoogleGenAI({ 
-  apiKey: process.env.GEMINI_API_KEY 
-});
 
 export async function POST(req: Request) {
   try {
@@ -54,8 +50,7 @@ export async function POST(req: Request) {
       "No agregues texto fuera del JSON ni uses bloques de código marcados con backticks."
     ].join("\n");
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+    const response = await generateContentWithFallback({
       contents: [{
         role: "user",
         parts: [{ text: prompt }]

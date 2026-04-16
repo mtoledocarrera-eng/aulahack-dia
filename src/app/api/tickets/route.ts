@@ -1,11 +1,7 @@
-import { GoogleGenAI } from "@google/genai";
+import { generateContentWithFallback } from "@/lib/ai/gemini";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 60; // Evita el timeout de 15 segundos en Vercel por defecto
-
-const ai = new GoogleGenAI({ 
-  apiKey: process.env.GEMINI_API_KEY 
-});
 
 export async function POST(req: Request) {
   try {
@@ -21,38 +17,37 @@ export async function POST(req: Request) {
 
     const { curso, asignatura, eje, logro } = contexto || {};
 
-    const prompt = `Actúa como un profesor experto en evaluación formativa. 
+    const prompt = `Actúa como un profesor experto en evaluación formativa y diseño de remediales. 
 Te he entregado dos documentos PDF:
 1. La prueba original que rindieron los estudiantes.
 2. Un reporte con los resultados del curso (donde puedes ver la distribución de respuestas y % de acierto por pregunta).
 
-CONTEXTO DEL CURSO:
-Este es un curso de ${curso} en la asignatura de ${asignatura}. El eje crítico a mejorar actualmente es "${eje}".
+CONTEXTO PRIORITARIO:
+Asignatura: ${asignatura}
+Curso: ${curso}
+Eje Crítico Detectado (más bajo): "${eje}" (Logro: ${logro}%)
 
-TAREA:
-1. Revisa el PDF de Resultados y determina **cuál fue la pregunta específica con el mayor porcentaje de respuestas incorrectas** (la más descendida).
-2. Busca esa pregunta específica en el PDF de la Prueba original para entender de qué trata.
-3. Observa en los Resultados cuál fue el distractor principal (la alternativa incorrecta más votada) para esa pregunta.
-4. Diseña un "Ticket de Salida" (Exit Ticket) de 5 minutos, listo para usar, que remedie la confusión exacta que originó ese error.
+TU TAREA:
+1. Analiza el reporte de resultados y selecciona las **3 o 4 preguntas más críticas** (las que tengan menor porcentaje de acierto) que pertenezcan o estén directamente relacionadas con el eje "${eje}".
+2. Busca esas preguntas en la prueba original para entender qué habilidad o conocimiento evalúan.
+3. Identifica los distractores más votados (los errores más comunes) para esas preguntas.
+4. Diseña un "Ticket de Salida Remedial" (10 minutos) que sirva como punto de partida para que el docente corrija estas confusiones.
 
-EL TICKET DEBE INCLUIR:
-1. Una declaración inicial diciendo: "Basado en los resultados, la pregunta más descendida fue la Pregunta X. Aquí tienes un remedial:"
-2. Una breve explicación (1 párrafo) de la trampa o error principal que los hizo fallar (sin culpar a los alumnos).
-3. Un ejercicio nuevo conceptual de opción múltiple (con 3 opciones, inspiradas en el distractor original).
-4. Una breve pregunta abierta de aplicación.
-5. Una escala de autoevaluación (ej. del 1 al 3) sobre la comprensión del tema.
-
-Usa un lenguaje motivador y adecuado para estudiantes de ${curso}. Forma un diseño atractivo en Markdown.
+EL TICKET DEBE INCLUIR (en formato Markdown atractivo):
+1. **Foco del Remedial:** Una breve declaración: "Basado en el bajo desempeño en el eje ${eje}, hemos identificado confusiones críticas en las preguntas X, Y, Z. Este ticket aborda esos puntos para iniciar la mejora."
+2. **Breve Explicación (El porqué del error):** 1 o 2 párrafos explicando pedagógicamente por qué los estudiantes se están confundiendo en este eje, basándote en los distractores analizados.
+3. **Actividad de Superación:** Diseña 2 o 3 ejercicios nuevos (pueden ser breves, de opción múltiple o completar) que ataquen directamente la confusión de las preguntas analizadas.
+4. **Pregunta de Aplicación Abierta:** Una pregunta que requiera que el alumno explique con sus palabras el concepto clave del eje "${eje}".
+5. **Autoevaluación:** Una escala cualitativa sobre su seguridad en este tema.
 
 IMPORTANTE: DEBES RESPONDER ESTRICTAMENTE EN FORMATO JSON VÁLIDO CON LA SIGUIENTE ESTRUCTURA:
 {
   "ticket": "El contenido completo del ticket de salida en formato Markdown",
-  "prompt_sugerido": "Un excelente 'prompt' detallado que resuma el descubrimiento pedagógico que acabas de hacer (ej. 'Mis alumnos fallaron en la Pregunta X sobre Y concepto, confundiendo A con B'). Este prompt debe servir para que el docente lo copie y pegue en otra IA (como ChatGPT) y pida generar más material para atacar esta confusión exacta, sin necesitar los PDFs."
+  "prompt_sugerido": "Un prompt detallado para que el docente use en otra IA, que resuma el hallazgo: 'Mis alumnos de ${curso} fallaron en el eje ${eje}, específicamente confundiendo A con B. Genera 5 ejercicios adicionales de tipo X para reforzar esto.' Incluye el OA o eje en la descripción."
 }
 No agregues texto fuera del JSON ni uses bloques de código marcados con backticks.`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+    const response = await generateContentWithFallback({
       contents: [{
         role: "user",
         parts: [
