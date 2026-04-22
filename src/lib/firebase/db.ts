@@ -38,7 +38,7 @@ export async function deleteAcademicEvaluation(userId: string, target: { asignat
 }
 
 // --- History (AI Generators) ---
-export async function saveAIHistory(userId: string, type: 'dua' | 'riesgo' | 'tickets', content: string, metadata: any): Promise<void> {
+export async function saveAIHistory(userId: string, type: 'dua' | 'riesgo' | 'tickets' | 'clima', content: string, metadata: any): Promise<void> {
   const ref = doc(collection(db, 'users', userId, `historial_${type}`));
   await setDoc(ref, {
     content,
@@ -47,7 +47,7 @@ export async function saveAIHistory(userId: string, type: 'dua' | 'riesgo' | 'ti
   });
 }
 
-export async function getAIHistory(userId: string, type: 'dua' | 'riesgo' | 'tickets'): Promise<any[]> {
+export async function getAIHistory(userId: string, type: 'dua' | 'riesgo' | 'tickets' | 'clima'): Promise<any[]> {
   const q = query(collection(db, 'users', userId, `historial_${type}`), orderBy('createdAt', 'desc'));
   const snap = await getDocs(q);
   return snap.docs.map(d => ({

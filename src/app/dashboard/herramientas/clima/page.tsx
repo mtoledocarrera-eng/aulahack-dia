@@ -2,8 +2,11 @@
 
 import { FileText, Copy, Bot, Check, UploadCloud, Loader2, HeartHandshake, ShieldAlert } from 'lucide-react';
 import { useState, useRef } from 'react';
+import { useAuth } from '@/lib/contexts/AuthContext';
+import { saveAIHistory } from '@/lib/firebase/db';
 
 export default function ClimaSocioemocionalPage() {
+  const { user } = useAuth();
   const [fileSocioemocional, setFileSocioemocional] = useState<File | null>(null);
   const [fileConvivencia, setFileConvivencia] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -81,6 +84,13 @@ export default function ClimaSocioemocionalPage() {
 
       const data = await res.json();
       setGeneratedReport(data.text);
+      
+      if (user) {
+        const filenames = [fileSocioemocional?.name, fileConvivencia?.name].filter(Boolean).join(' y ');
+        await saveAIHistory(user.uid, 'clima', data.text, {
+          filename: filenames || 'Desconocido',
+        });
+      }
     } catch (error) {
       console.error(error);
       alert('Ocurrió un error al conectar con Gemini.');

@@ -14,12 +14,18 @@ interface GenerateParams {
  * Si falla el primero (por cuota o error), intenta con el siguiente.
  */
 export async function generateContentWithFallback(params: GenerateParams) {
-  const models = [
-    'gemini-3.1-pro-preview',       // Máximo razonamiento (Sujeto a cuota)
-    'gemini-3-flash-preview',       // Balance ideal (Principal)
-    'gemini-3.1-flash-lite-preview',// Fallback de baja latencia
-    'gemini-2.5-flash'              // Fallback estable de generación anterior
+  // Lista predeterminada de modelos por si no se definen en el entorno
+  const defaultModels = [
+    'gemini-3.1-pro-preview',
+    'gemini-3-flash-preview',
+    'gemini-3.1-flash-lite-preview',
+    'gemini-2.5-flash'
   ];
+  
+  // Se puede sobreescribir la prioridad desde .env.local (separado por comas)
+  const models = process.env.GEMINI_MODELS_PRIORITY 
+    ? process.env.GEMINI_MODELS_PRIORITY.split(',').map(m => m.trim())
+    : defaultModels;
 
   let lastError = null;
 

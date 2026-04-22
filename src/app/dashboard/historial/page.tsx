@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/lib/contexts/AuthContext';
 import { getAIHistory, loadDatasetFromCloud, deleteAcademicEvaluation } from '@/lib/firebase/db';
-import { Archive, Bot, ShieldAlert, FileText, Loader2, Clock } from 'lucide-react';
+import { Archive, Bot, ShieldAlert, FileText, Loader2, Clock, HeartHandshake } from 'lucide-react';
 
 export default function HistorialPage() {
   const { user } = useAuth();
@@ -11,23 +11,26 @@ export default function HistorialPage() {
   const [historiaDua, setHistoriaDua] = useState<any[]>([]);
   const [historiaRiesgo, setHistoriaRiesgo] = useState<any[]>([]);
   const [historiaTickets, setHistoriaTickets] = useState<any[]>([]);
+  const [historiaClima, setHistoriaClima] = useState<any[]>([]);
   const [datasets, setDatasets] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'dua' | 'riesgo' | 'tickets' | 'datos'>('dua');
+  const [activeTab, setActiveTab] = useState<'dua' | 'riesgo' | 'tickets' | 'clima' | 'datos'>('dua');
 
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [dua, riesgo, tickets, dataset] = await Promise.all([
+        const [dua, riesgo, tickets, clima, dataset] = await Promise.all([
           getAIHistory(user.uid, 'dua'),
           getAIHistory(user.uid, 'riesgo'),
           getAIHistory(user.uid, 'tickets'),
+          getAIHistory(user.uid, 'clima'),
           loadDatasetFromCloud(user.uid)
         ]);
         setHistoriaDua(dua);
         setHistoriaRiesgo(riesgo);
         setHistoriaTickets(tickets);
+        setHistoriaClima(clima);
         setDatasets(dataset?.academicos || []);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -126,6 +129,19 @@ export default function HistorialPage() {
               <span className="text-xs bg-black/10 dark:bg-white/10 px-2 py-0.5 rounded-full">{historiaTickets.length}</span>
             </button>
             <button
+              onClick={() => setActiveTab('clima')}
+              className={`text-left px-4 py-3 rounded-xl flex items-center justify-between transition-colors font-medium border ${
+                activeTab === 'clima' 
+                  ? 'bg-pink-50 text-pink-700 border-pink-200 dark:bg-pink-900/40 dark:text-pink-300 dark:border-pink-800' 
+                  : 'bg-transparent text-slate-600 border-transparent hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <HeartHandshake className="w-4 h-4" /> Clima y Socioemocional
+              </div>
+              <span className="text-xs bg-black/10 dark:bg-white/10 px-2 py-0.5 rounded-full">{historiaClima.length}</span>
+            </button>
+            <button
               onClick={() => setActiveTab('datos')}
               className={`text-left px-4 py-3 rounded-xl flex items-center justify-between transition-colors font-medium border ${
                 activeTab === 'datos' 
@@ -168,6 +184,16 @@ export default function HistorialPage() {
               ) : (
                 historiaTickets.map((item) => (
                   <HistoryItem key={item.id} item={item} title={`Ticket Remedial: ${item.curso} - ${item.asignatura}`} subtitle={`Eje Débil: ${item.eje} (${item.logro}% logro)`} />
+                ))
+              )
+            )}
+
+            {activeTab === 'clima' && (
+              historiaClima.length === 0 ? (
+                <EmptyState icon={<HeartHandshake />} text="Aún no has generado radiografías de clima y socioemocional." />
+              ) : (
+                historiaClima.map((item) => (
+                  <HistoryItem key={item.id} item={item} title={`Radiografía Clima y Socioemocional`} subtitle={item.filename ? `Archivos: ${item.filename}` : "Generada a partir de informes DIA"} />
                 ))
               )
             )}
